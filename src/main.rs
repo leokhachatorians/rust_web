@@ -7,30 +7,30 @@ fn main() {
     let listener = TcpListener::bind(addr).unwrap();
 
     for stream in listener.incoming() {
-        handle_connection(stream.unwrap());
+        let stream = stream.unwrap();
+        thread::spawn(move ||handle_connection(stream));
     }
 }
 
 fn handle_connection(stream: TcpStream) {
-    thread::spawn(|| {
-        let stream = stream;
-        println!("{:?}", stream);
-        let mut reader = BufReader::new(stream);
+    println!("{:?}", stream);
+    let mut reader = BufReader::new(stream);
 
-        for line in reader.by_ref().lines() {
-            let line = match line {
-                Ok(v) => v,
-                Err(e) => {
-                    println!("Error: {}", e);
-                    break;
-                    //std::process::exit(1);
-                }
-            };
-            if line == "" {
+    for line in reader.by_ref().lines() {
+        let line = match line {
+            Ok(v) => v,
+            Err(e) => {
+                println!("Error: {}", e);
                 break;
             }
+        };
+        if line == "" {
+            break;
         }
-        let response = "HTTP/1.1 200 OK\n\n<html><body>Hello, world!</body></html>";
-        reader.into_inner().write_all(response.as_bytes()).unwrap();
-    });
+    }
+    let response = "HTTP/1.1 200 OK\n\n<html><body>Hello, world!</body></html>";
+    reader.into_inner().write_all(response.as_bytes()).unwrap();
+   // for i in &vec {
+   //     reader.into_inner().write(i.as_bytes()).unwrap();
+   // }
 }
