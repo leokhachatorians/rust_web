@@ -18,7 +18,15 @@ fn handle_connection(stream: TcpStream) {
         let mut reader = BufReader::new(stream);
 
         for line in reader.by_ref().lines() {
-            if line.unwrap() == "" {
+            let line = match line {
+                Ok(v) => v,
+                Err(e) => {
+                    println!("Error: {}", e);
+                    break;
+                    //std::process::exit(1);
+                }
+            };
+            if line == "" {
                 break;
             }
         }
